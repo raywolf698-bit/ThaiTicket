@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: thai-lottery-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: 4000
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        value: lottery_db
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: SMS_API_KEY
+        value: stub
+      - key: PROMPTPAY_WEBHOOK_SECRET
+        value: test_secret
+      - key: WAVE_WEBHOOK_SECRET
+        value: test_secret
+      - key: GRABPAY_WEBHOOK_SECRET
+        value: test_secret
+      - key: CRYPTO_WEBHOOK_SECRET
+        value: test_secret
