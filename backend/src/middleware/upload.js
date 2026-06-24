@@ -1,6 +1,6 @@
 const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
-const CloudinaryStorage = require('multer-storage-cloudinary');
+const { Readable } = require('stream');
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -8,13 +8,28 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  folder: 'thai-lottery-tickets',
-  allowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
-  transformation: [{ width: 800, height: 600, crop: 'limit' }],
+// Store file in memory first, then upload to Cloudinary manually
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new Error('Only image files are allowed'));
+  },
 });
 
-const upload = multer({ storage });
+// Call this after upload.single('image') middleware
+const uploadToCloudinary = (buffer) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'thai-lottery-tickets', transformation: [{ width: 800, height: 600, crop: 'limit' }] },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    Readable.from(buffer).pipe(stream);
+  });
+};
 
-module.exports = upload;
+module.exports = { upload, uploadToCloudinary };

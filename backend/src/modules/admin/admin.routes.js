@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const auth = require('../../middleware/auth');
 const roles = require('../../middleware/roles');
-const upload = require('../../middleware/upload');
+const { upload, uploadToCloudinary } = require('../../middleware/upload');
 const controller = require('./admin.controller');
 const ticketService = require('../tickets/tickets.service');
 
@@ -13,11 +13,16 @@ router.patch('/users/:id/ban', controller.banUser);
 router.patch('/users/:id/role', controller.setRole);
 router.patch('/users/:id/kyc', controller.updateKyc);
 
-// Create ticket with image
+// Create ticket with optional image upload to Cloudinary
 router.post('/tickets', upload.single('image'), async (req, res) => {
   try {
     const { number, draw_date, price, set, series } = req.body;
-    const image_url = req.file ? `/uploads/${req.file.filename}` : null;
+    let image_url = null;
+    if (req.file) {
+      // multer memoryStorage provides `req.file.buffer`
+      const result = await uploadToCloudinary(req.file.buffer);
+      image_url = result?.secure_url || null;
+    }
     const result = await ticketService.createTicket({ number, draw_date, price, set, series, image_url });
     res.json({ success: true, id: result.id, image_url });
   } catch (err) {
@@ -63,15 +68,4 @@ router.get('/audit/logs', controller.auditLogs);
 // Withdrawal management
 router.get('/withdrawals', controller.getPendingWithdrawals);
 router.patch('/withdrawals/:id', controller.reviewWithdrawal);
-router.post('/tickets', upload.single('image'), async (req, res) => {
-  try {
-    const { number, draw_date, price, set, series } = req.body;
-    // Cloudinary gives full URL directly
-    const image_url = req.file ? req.file.path : null;
-    const result = await ticketService.createTicket({ number, draw_date, price, set, series, image_url });
-    res.json({ success: true, id: result.id, image_url });
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
 module.exports = router;
