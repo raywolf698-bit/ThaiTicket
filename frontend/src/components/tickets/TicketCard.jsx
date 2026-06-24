@@ -15,7 +15,13 @@ export default function TicketCard({ ticket, onBuy, buying, lang }) {
       {/* Ticket image */}
       <div style={styles.imageWrap}>
         {ticket.image_url ? (
-  <img src={`${import.meta.env.VITE_SERVER_URL}${ticket.image_url}`} alt={`Ticket ${ticket.number}`} style={styles.image} />
+          <img
+            src={ticket.image_url.startsWith('http')
+              ? ticket.image_url
+              : `${import.meta.env.VITE_SERVER_URL}${ticket.image_url}`}
+            alt={`Ticket ${ticket.number}`}
+            style={styles.image}
+          />
         ) : (
           <div style={styles.imagePlaceholder}>
             <span style={styles.placeholderIcon}>🎟</span>

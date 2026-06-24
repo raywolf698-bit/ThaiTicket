@@ -63,5 +63,15 @@ router.get('/audit/logs', controller.auditLogs);
 // Withdrawal management
 router.get('/withdrawals', controller.getPendingWithdrawals);
 router.patch('/withdrawals/:id', controller.reviewWithdrawal);
-
+router.post('/tickets', upload.single('image'), async (req, res) => {
+  try {
+    const { number, draw_date, price, set, series } = req.body;
+    // Cloudinary gives full URL directly
+    const image_url = req.file ? req.file.path : null;
+    const result = await ticketService.createTicket({ number, draw_date, price, set, series, image_url });
+    res.json({ success: true, id: result.id, image_url });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
 module.exports = router;

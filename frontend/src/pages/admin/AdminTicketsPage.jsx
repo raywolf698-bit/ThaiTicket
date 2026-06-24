@@ -211,7 +211,13 @@ export default function AdminTicketsPage() {
             <div key={ticket.id} style={styles.row}>
               <div style={styles.rowImage}>
                 {ticket.image_url ? (
-                  <img src={`${SERVER_URL}${ticket.image_url}`} alt="" style={styles.rowImg} />
+                  <img
+                    src={ticket.image_url.startsWith('http')
+                      ? ticket.image_url
+                      : `${SERVER_URL}${ticket.image_url}`}
+                    alt=""
+                    style={styles.rowImg}
+                  />
                 ) : (
                   <div style={styles.rowImgPlaceholder}>🎟</div>
                 )}

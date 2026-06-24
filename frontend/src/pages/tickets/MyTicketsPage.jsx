@@ -86,7 +86,9 @@ export default function MyTicketsPage() {
               <div style={styles.imageWrap}>
                 {ticket.image_url ? (
                   <img
-                    src={`${SERVER_URL}${ticket.image_url}`}
+                    src={ticket.image_url.startsWith('http')
+                      ? ticket.image_url
+                      : `${SERVER_URL}${ticket.image_url}`}
                     alt={ticket.number}
                     style={styles.image}
                   />
